@@ -4,7 +4,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --format esm --clean",
+    "build": "tsup",
     "dev": "tsup src/index.ts --format esm --watch",
     "type-check": "tsc --noEmit"
   },
