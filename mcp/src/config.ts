@@ -7,7 +7,7 @@ const CONFIG_DIR = path.join(os.homedir(), ".claudebin");
 const CONFIG_PATH = path.join(CONFIG_DIR, "config.json");
 
 export const getApiBaseUrl = (): string => {
-  return process.env.CLAUDEBIN_API_URL || "http://localhost:3000";
+  return process.env.CLAUDEBIN_API_URL || "https://claudebin.com";
 };
 
 export const readConfig = async (): Promise<Config> => {

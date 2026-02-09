@@ -20842,7 +20842,7 @@ import path from "path";
 var CONFIG_DIR = path.join(os.homedir(), ".claudebin");
 var CONFIG_PATH = path.join(CONFIG_DIR, "config.json");
 var getApiBaseUrl = () => {
-  return process.env.CLAUDEBIN_API_URL || "http://localhost:3000";
+  return process.env.CLAUDEBIN_API_URL || "https://claudebin.com";
 };
 var readConfig = async () => {
   try {
