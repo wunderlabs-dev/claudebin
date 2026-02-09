@@ -1,6 +1,9 @@
 {
   "name": "claudebin-marketplace",
-  "owner": "wunderlabs-dev",
+  "owner": {
+    "name": "Wunderlabs",
+    "email": "hello@wunderlabs.dev"
+  },
   "metadata": {
     "description": "Share Claude Code sessions to claudebin.com",
     "version": "0.1.0"
@@ -9,8 +12,8 @@
     {
       "name": "claudebin",
       "source": {
-        "type": "git",
-        "url": "https://github.com/wunderlabs-dev/claudebin"
+        "source": "url",
+        "url": "https://github.com/wunderlabs-dev/claudebin.git"
       },
       "description": "Share the current Claude Code session to claudebin.com and get a shareable URL",
       "version": "0.1.0",
