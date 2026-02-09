@@ -2,8 +2,8 @@
 description: "Share the current session to claudebin.com and get a shareable URL"
 ---
 
-Call the share tool with:
-- project_path: the current working directory
+Use the MCP tool `mcp__claudebin__share` with these parameters:
+- project_path: the current working directory (use absolute path)
 - is_public: true
 
 The tool will automatically authenticate if needed (opens browser for login).
