@@ -63,3 +63,11 @@ Build the MCP server:
 cd mcp
 bun run build
 ```
+
+Run Claude with the local plugin and a local API:
+
+```bash
+CLAUDEBIN_API_URL=http://localhost:3000 claude --plugin-dir /path/to/claudebin --dangerously-skip-permissions
+```
+
+This allows testing against a local claudebin.com backend running on port 3000.
