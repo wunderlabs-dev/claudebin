@@ -7258,8 +7258,8 @@ var en_default = errorMap;
 
 // node_modules/zod/v3/errors.js
 var overrideErrorMap = en_default;
-function setErrorMap(map2) {
-  overrideErrorMap = map2;
+function setErrorMap(map) {
+  overrideErrorMap = map;
 }
 function getErrorMap() {
   return overrideErrorMap;
@@ -7282,8 +7282,8 @@ var makeIssue = (params) => {
   }
   let errorMessage = "";
   const maps = errorMaps.filter((m) => !!m).slice().reverse();
-  for (const map2 of maps) {
-    errorMessage = map2(fullIssue, { data, defaultError: errorMessage }).message;
+  for (const map of maps) {
+    errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
   }
   return {
     ...issueData,
@@ -12639,7 +12639,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     return (payload, ctx) => fn(shape, payload, ctx);
   };
   let fastpass;
-  const isObject3 = isObject;
+  const isObject2 = isObject;
   const jit = !globalConfig.jitless;
   const allowsEval2 = allowsEval;
   const fastEnabled = jit && allowsEval2.value;
@@ -12648,7 +12648,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   inst._zod.parse = (payload, ctx) => {
     value ?? (value = _normalized.value);
     const input = payload.value;
-    if (!isObject3(input)) {
+    if (!isObject2(input)) {
       payload.issues.push({
         expected: "object",
         code: "invalid_type",
@@ -12791,19 +12791,19 @@ var $ZodDiscriminatedUnion = /* @__PURE__ */ $constructor("$ZodDiscriminatedUnio
   });
   const disc = cached(() => {
     const opts = def.options;
-    const map2 = /* @__PURE__ */ new Map();
+    const map = /* @__PURE__ */ new Map();
     for (const o of opts) {
       const values = o._zod.propValues[def.discriminator];
       if (!values || values.size === 0)
         throw new Error(`Invalid discriminated union option at index "${def.options.indexOf(o)}"`);
       for (const v of values) {
-        if (map2.has(v)) {
+        if (map.has(v)) {
           throw new Error(`Duplicate discriminator value "${String(v)}"`);
         }
-        map2.set(v, o);
+        map.set(v, o);
       }
     }
-    return map2;
+    return map;
   });
   inst._zod.parse = (payload, ctx) => {
     const input = payload.value;
@@ -20859,6 +20859,42 @@ var writeConfig = async (config2) => {
   });
 };
 
+// src/api.ts
+var apiRequest = async (path3, options = {}) => {
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${path3}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers
+    }
+  });
+  if (!res.ok) {
+    const error2 = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(error2.error || `API error: ${res.status}`);
+  }
+  return res.json();
+};
+var api = {
+  auth: {
+    start: () => apiRequest("/api/auth/start", { method: "POST" }),
+    poll: (code) => apiRequest(`/api/auth/poll?code=${encodeURIComponent(code)}`),
+    validate: (token) => apiRequest(`/api/auth/validate?token=${encodeURIComponent(token)}`),
+    refresh: (refresh_token) => apiRequest("/api/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token })
+    })
+  },
+  sessions: {
+    publish: (data) => apiRequest("/api/sessions/publish", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+    poll: (id) => apiRequest(`/api/sessions/poll?id=${encodeURIComponent(id)}`)
+  }
+};
+
 // src/constants.ts
 var TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1e3;
 var DEFAULT_TOKEN_TTL_MS = 60 * 60 * 1e3;
@@ -20877,1210 +20913,9 @@ var SessionStatus = {
   FAILED: "failed"
 };
 
-// node_modules/@trpc/client/dist/objectSpread2-BvkFp-_Y.mjs
-var __create2 = Object.create;
-var __defProp2 = Object.defineProperty;
-var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames2 = Object.getOwnPropertyNames;
-var __getProtoOf2 = Object.getPrototypeOf;
-var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-var __commonJS2 = (cb, mod) => function() {
-  return mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __copyProps2 = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames2(from), i = 0, n = keys.length, key; i < n; i++) {
-    key = keys[i];
-    if (!__hasOwnProp2.call(to, key) && key !== except) __defProp2(to, key, {
-      get: ((k) => from[k]).bind(null, key),
-      enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable
-    });
-  }
-  return to;
-};
-var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", {
-  value: mod,
-  enumerable: true
-}) : target, mod));
-var require_typeof = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/typeof.js"(exports, module) {
-  function _typeof$2(o) {
-    "@babel/helpers - typeof";
-    return module.exports = _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o$1) {
-      return typeof o$1;
-    } : function(o$1) {
-      return o$1 && "function" == typeof Symbol && o$1.constructor === Symbol && o$1 !== Symbol.prototype ? "symbol" : typeof o$1;
-    }, module.exports.__esModule = true, module.exports["default"] = module.exports, _typeof$2(o);
-  }
-  module.exports = _typeof$2, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_toPrimitive = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/toPrimitive.js"(exports, module) {
-  var _typeof$1 = require_typeof()["default"];
-  function toPrimitive$1(t, r) {
-    if ("object" != _typeof$1(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof$1(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
-  module.exports = toPrimitive$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_toPropertyKey = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/toPropertyKey.js"(exports, module) {
-  var _typeof = require_typeof()["default"];
-  var toPrimitive = require_toPrimitive();
-  function toPropertyKey$1(t) {
-    var i = toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : i + "";
-  }
-  module.exports = toPropertyKey$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_defineProperty = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/defineProperty.js"(exports, module) {
-  var toPropertyKey = require_toPropertyKey();
-  function _defineProperty(e, r, t) {
-    return (r = toPropertyKey(r)) in e ? Object.defineProperty(e, r, {
-      value: t,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    }) : e[r] = t, e;
-  }
-  module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_objectSpread2 = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/objectSpread2.js"(exports, module) {
-  var defineProperty = require_defineProperty();
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r$1) {
-        return Object.getOwnPropertyDescriptor(e, r$1).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread2(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r$1) {
-        defineProperty(e, r$1, t[r$1]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r$1) {
-        Object.defineProperty(e, r$1, Object.getOwnPropertyDescriptor(t, r$1));
-      });
-    }
-    return e;
-  }
-  module.exports = _objectSpread2, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-
-// node_modules/@trpc/server/dist/observable-UMO3vUa_.mjs
-function observable(subscribe) {
-  const self = {
-    subscribe(observer) {
-      let teardownRef = null;
-      let isDone = false;
-      let unsubscribed = false;
-      let teardownImmediately = false;
-      function unsubscribe() {
-        if (teardownRef === null) {
-          teardownImmediately = true;
-          return;
-        }
-        if (unsubscribed) return;
-        unsubscribed = true;
-        if (typeof teardownRef === "function") teardownRef();
-        else if (teardownRef) teardownRef.unsubscribe();
-      }
-      teardownRef = subscribe({
-        next(value) {
-          var _observer$next;
-          if (isDone) return;
-          (_observer$next = observer.next) === null || _observer$next === void 0 || _observer$next.call(observer, value);
-        },
-        error(err) {
-          var _observer$error;
-          if (isDone) return;
-          isDone = true;
-          (_observer$error = observer.error) === null || _observer$error === void 0 || _observer$error.call(observer, err);
-          unsubscribe();
-        },
-        complete() {
-          var _observer$complete;
-          if (isDone) return;
-          isDone = true;
-          (_observer$complete = observer.complete) === null || _observer$complete === void 0 || _observer$complete.call(observer);
-          unsubscribe();
-        }
-      });
-      if (teardownImmediately) unsubscribe();
-      return { unsubscribe };
-    },
-    pipe(...operations) {
-      return operations.reduce(pipeReducer, self);
-    }
-  };
-  return self;
-}
-function pipeReducer(prev, fn) {
-  return fn(prev);
-}
-function observableToPromise(observable$1) {
-  const ac = new AbortController();
-  const promise = new Promise((resolve, reject) => {
-    let isDone = false;
-    function onDone() {
-      if (isDone) return;
-      isDone = true;
-      obs$.unsubscribe();
-    }
-    ac.signal.addEventListener("abort", () => {
-      reject(ac.signal.reason);
-    });
-    const obs$ = observable$1.subscribe({
-      next(data) {
-        isDone = true;
-        resolve(data);
-        onDone();
-      },
-      error(data) {
-        reject(data);
-      },
-      complete() {
-        ac.abort();
-        onDone();
-      }
-    });
-  });
-  return promise;
-}
-
-// node_modules/@trpc/server/dist/observable-CUiPknO-.mjs
-function share(_opts) {
-  return (source) => {
-    let refCount = 0;
-    let subscription = null;
-    const observers = [];
-    function startIfNeeded() {
-      if (subscription) return;
-      subscription = source.subscribe({
-        next(value) {
-          for (const observer of observers) {
-            var _observer$next;
-            (_observer$next = observer.next) === null || _observer$next === void 0 || _observer$next.call(observer, value);
-          }
-        },
-        error(error2) {
-          for (const observer of observers) {
-            var _observer$error;
-            (_observer$error = observer.error) === null || _observer$error === void 0 || _observer$error.call(observer, error2);
-          }
-        },
-        complete() {
-          for (const observer of observers) {
-            var _observer$complete;
-            (_observer$complete = observer.complete) === null || _observer$complete === void 0 || _observer$complete.call(observer);
-          }
-        }
-      });
-    }
-    function resetIfNeeded() {
-      if (refCount === 0 && subscription) {
-        const _sub = subscription;
-        subscription = null;
-        _sub.unsubscribe();
-      }
-    }
-    return observable((subscriber) => {
-      refCount++;
-      observers.push(subscriber);
-      startIfNeeded();
-      return { unsubscribe() {
-        refCount--;
-        resetIfNeeded();
-        const index = observers.findIndex((v) => v === subscriber);
-        if (index > -1) observers.splice(index, 1);
-      } };
-    });
-  };
-}
-function behaviorSubject(initialValue) {
-  let value = initialValue;
-  const observerList = [];
-  const addObserver = (observer) => {
-    if (value !== void 0) observer.next(value);
-    observerList.push(observer);
-  };
-  const removeObserver = (observer) => {
-    observerList.splice(observerList.indexOf(observer), 1);
-  };
-  const obs = observable((observer) => {
-    addObserver(observer);
-    return () => {
-      removeObserver(observer);
-    };
-  });
-  obs.next = (nextValue) => {
-    if (value === nextValue) return;
-    value = nextValue;
-    for (const observer of observerList) observer.next(nextValue);
-  };
-  obs.get = () => value;
-  return obs;
-}
-
-// node_modules/@trpc/client/dist/splitLink-B7Cuf2c_.mjs
-function createChain(opts) {
-  return observable((observer) => {
-    function execute(index = 0, op = opts.op) {
-      const next = opts.links[index];
-      if (!next) throw new Error("No more links to execute - did you forget to add an ending link?");
-      const subscription = next({
-        op,
-        next(nextOp) {
-          const nextObserver = execute(index + 1, nextOp);
-          return nextObserver;
-        }
-      });
-      return subscription;
-    }
-    const obs$ = execute();
-    return obs$.subscribe(observer);
-  });
-}
-
-// node_modules/@trpc/server/dist/codes-DagpWZLc.mjs
-function isObject2(value) {
-  return !!value && !Array.isArray(value) && typeof value === "object";
-}
-function emptyObject() {
-  return /* @__PURE__ */ Object.create(null);
-}
-var TRPC_ERROR_CODES_BY_KEY = {
-  PARSE_ERROR: -32700,
-  BAD_REQUEST: -32600,
-  INTERNAL_SERVER_ERROR: -32603,
-  NOT_IMPLEMENTED: -32603,
-  BAD_GATEWAY: -32603,
-  SERVICE_UNAVAILABLE: -32603,
-  GATEWAY_TIMEOUT: -32603,
-  UNAUTHORIZED: -32001,
-  PAYMENT_REQUIRED: -32002,
-  FORBIDDEN: -32003,
-  NOT_FOUND: -32004,
-  METHOD_NOT_SUPPORTED: -32005,
-  TIMEOUT: -32008,
-  CONFLICT: -32009,
-  PRECONDITION_FAILED: -32012,
-  PAYLOAD_TOO_LARGE: -32013,
-  UNSUPPORTED_MEDIA_TYPE: -32015,
-  UNPROCESSABLE_CONTENT: -32022,
-  PRECONDITION_REQUIRED: -32028,
-  TOO_MANY_REQUESTS: -32029,
-  CLIENT_CLOSED_REQUEST: -32099
-};
-var retryableRpcCodes = [
-  TRPC_ERROR_CODES_BY_KEY.BAD_GATEWAY,
-  TRPC_ERROR_CODES_BY_KEY.SERVICE_UNAVAILABLE,
-  TRPC_ERROR_CODES_BY_KEY.GATEWAY_TIMEOUT,
-  TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR
-];
-
-// node_modules/@trpc/server/dist/getErrorShape-vC8mUXJD.mjs
-var __create3 = Object.create;
-var __defProp3 = Object.defineProperty;
-var __getOwnPropDesc3 = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames3 = Object.getOwnPropertyNames;
-var __getProtoOf3 = Object.getPrototypeOf;
-var __hasOwnProp3 = Object.prototype.hasOwnProperty;
-var __commonJS3 = (cb, mod) => function() {
-  return mod || (0, cb[__getOwnPropNames3(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __copyProps3 = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames3(from), i = 0, n = keys.length, key; i < n; i++) {
-    key = keys[i];
-    if (!__hasOwnProp3.call(to, key) && key !== except) __defProp3(to, key, {
-      get: ((k) => from[k]).bind(null, key),
-      enumerable: !(desc = __getOwnPropDesc3(from, key)) || desc.enumerable
-    });
-  }
-  return to;
-};
-var __toESM3 = (mod, isNodeMode, target) => (target = mod != null ? __create3(__getProtoOf3(mod)) : {}, __copyProps3(isNodeMode || !mod || !mod.__esModule ? __defProp3(target, "default", {
-  value: mod,
-  enumerable: true
-}) : target, mod));
-var noop = () => {
-};
-var freezeIfAvailable = (obj) => {
-  if (Object.freeze) Object.freeze(obj);
-};
-function createInnerProxy(callback, path3, memo) {
-  var _memo$cacheKey;
-  const cacheKey = path3.join(".");
-  (_memo$cacheKey = memo[cacheKey]) !== null && _memo$cacheKey !== void 0 || (memo[cacheKey] = new Proxy(noop, {
-    get(_obj, key) {
-      if (typeof key !== "string" || key === "then") return void 0;
-      return createInnerProxy(callback, [...path3, key], memo);
-    },
-    apply(_1, _2, args) {
-      const lastOfPath = path3[path3.length - 1];
-      let opts = {
-        args,
-        path: path3
-      };
-      if (lastOfPath === "call") opts = {
-        args: args.length >= 2 ? [args[1]] : [],
-        path: path3.slice(0, -1)
-      };
-      else if (lastOfPath === "apply") opts = {
-        args: args.length >= 2 ? args[1] : [],
-        path: path3.slice(0, -1)
-      };
-      freezeIfAvailable(opts.args);
-      freezeIfAvailable(opts.path);
-      return callback(opts);
-    }
-  }));
-  return memo[cacheKey];
-}
-var createRecursiveProxy = (callback) => createInnerProxy(callback, [], emptyObject());
-var createFlatProxy = (callback) => {
-  return new Proxy(noop, { get(_obj, name) {
-    if (name === "then") return void 0;
-    return callback(name);
-  } });
-};
-var require_typeof2 = __commonJS3({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/typeof.js"(exports, module) {
-  function _typeof$2(o) {
-    "@babel/helpers - typeof";
-    return module.exports = _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o$1) {
-      return typeof o$1;
-    } : function(o$1) {
-      return o$1 && "function" == typeof Symbol && o$1.constructor === Symbol && o$1 !== Symbol.prototype ? "symbol" : typeof o$1;
-    }, module.exports.__esModule = true, module.exports["default"] = module.exports, _typeof$2(o);
-  }
-  module.exports = _typeof$2, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_toPrimitive2 = __commonJS3({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/toPrimitive.js"(exports, module) {
-  var _typeof$1 = require_typeof2()["default"];
-  function toPrimitive$1(t, r) {
-    if ("object" != _typeof$1(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof$1(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
-  module.exports = toPrimitive$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_toPropertyKey2 = __commonJS3({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/toPropertyKey.js"(exports, module) {
-  var _typeof = require_typeof2()["default"];
-  var toPrimitive = require_toPrimitive2();
-  function toPropertyKey$1(t) {
-    var i = toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : i + "";
-  }
-  module.exports = toPropertyKey$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_defineProperty2 = __commonJS3({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/defineProperty.js"(exports, module) {
-  var toPropertyKey = require_toPropertyKey2();
-  function _defineProperty(e, r, t) {
-    return (r = toPropertyKey(r)) in e ? Object.defineProperty(e, r, {
-      value: t,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    }) : e[r] = t, e;
-  }
-  module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_objectSpread22 = __commonJS3({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/objectSpread2.js"(exports, module) {
-  var defineProperty = require_defineProperty2();
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r$1) {
-        return Object.getOwnPropertyDescriptor(e, r$1).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread2(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r$1) {
-        defineProperty(e, r$1, t[r$1]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r$1) {
-        Object.defineProperty(e, r$1, Object.getOwnPropertyDescriptor(t, r$1));
-      });
-    }
-    return e;
-  }
-  module.exports = _objectSpread2, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var import_objectSpread2 = __toESM3(require_objectSpread22(), 1);
-
-// node_modules/@trpc/server/dist/tracked-D4V22yc5.mjs
-var import_defineProperty = __toESM3(require_defineProperty2(), 1);
-var import_objectSpread2$1 = __toESM3(require_objectSpread22(), 1);
-function transformResultInner(response, transformer) {
-  if ("error" in response) {
-    const error2 = transformer.deserialize(response.error);
-    return {
-      ok: false,
-      error: (0, import_objectSpread2$1.default)((0, import_objectSpread2$1.default)({}, response), {}, { error: error2 })
-    };
-  }
-  const result = (0, import_objectSpread2$1.default)((0, import_objectSpread2$1.default)({}, response.result), (!response.result.type || response.result.type === "data") && {
-    type: "data",
-    data: transformer.deserialize(response.result.data)
-  });
-  return {
-    ok: true,
-    result
-  };
-}
-var TransformResultError = class extends Error {
-  constructor() {
-    super("Unable to transform response from server");
-  }
-};
-function transformResult(response, transformer) {
-  let result;
-  try {
-    result = transformResultInner(response, transformer);
-  } catch (_unused) {
-    throw new TransformResultError();
-  }
-  if (!result.ok && (!isObject2(result.error.error) || typeof result.error.error["code"] !== "number")) throw new TransformResultError();
-  if (result.ok && !isObject2(result.result)) throw new TransformResultError();
-  return result;
-}
-var import_objectSpread22 = __toESM3(require_objectSpread22(), 1);
-
-// node_modules/@trpc/client/dist/TRPCClientError-CjKyS10w.mjs
-var import_defineProperty2 = __toESM2(require_defineProperty(), 1);
-var import_objectSpread23 = __toESM2(require_objectSpread2(), 1);
-function isTRPCClientError(cause) {
-  return cause instanceof TRPCClientError;
-}
-function isTRPCErrorResponse(obj) {
-  return isObject2(obj) && isObject2(obj["error"]) && typeof obj["error"]["code"] === "number" && typeof obj["error"]["message"] === "string";
-}
-function getMessageFromUnknownError(err, fallback) {
-  if (typeof err === "string") return err;
-  if (isObject2(err) && typeof err["message"] === "string") return err["message"];
-  return fallback;
-}
-var TRPCClientError = class TRPCClientError2 extends Error {
-  constructor(message, opts) {
-    var _opts$result, _opts$result2;
-    const cause = opts === null || opts === void 0 ? void 0 : opts.cause;
-    super(message, { cause });
-    (0, import_defineProperty2.default)(this, "cause", void 0);
-    (0, import_defineProperty2.default)(this, "shape", void 0);
-    (0, import_defineProperty2.default)(this, "data", void 0);
-    (0, import_defineProperty2.default)(this, "meta", void 0);
-    this.meta = opts === null || opts === void 0 ? void 0 : opts.meta;
-    this.cause = cause;
-    this.shape = opts === null || opts === void 0 || (_opts$result = opts.result) === null || _opts$result === void 0 ? void 0 : _opts$result.error;
-    this.data = opts === null || opts === void 0 || (_opts$result2 = opts.result) === null || _opts$result2 === void 0 ? void 0 : _opts$result2.error.data;
-    this.name = "TRPCClientError";
-    Object.setPrototypeOf(this, TRPCClientError2.prototype);
-  }
-  static from(_cause, opts = {}) {
-    const cause = _cause;
-    if (isTRPCClientError(cause)) {
-      if (opts.meta) cause.meta = (0, import_objectSpread23.default)((0, import_objectSpread23.default)({}, cause.meta), opts.meta);
-      return cause;
-    }
-    if (isTRPCErrorResponse(cause)) return new TRPCClientError2(cause.error.message, (0, import_objectSpread23.default)((0, import_objectSpread23.default)({}, opts), {}, { result: cause }));
-    return new TRPCClientError2(getMessageFromUnknownError(cause, "Unknown error"), (0, import_objectSpread23.default)((0, import_objectSpread23.default)({}, opts), {}, { cause }));
-  }
-};
-
-// node_modules/@trpc/client/dist/unstable-internals-Bg7n9BBj.mjs
-function getTransformer(transformer) {
-  const _transformer = transformer;
-  if (!_transformer) return {
-    input: {
-      serialize: (data) => data,
-      deserialize: (data) => data
-    },
-    output: {
-      serialize: (data) => data,
-      deserialize: (data) => data
-    }
-  };
-  if ("input" in _transformer) return _transformer;
-  return {
-    input: _transformer,
-    output: _transformer
-  };
-}
-
-// node_modules/@trpc/client/dist/httpUtils-Dv57hbOd.mjs
-var isFunction2 = (fn) => typeof fn === "function";
-function getFetch(customFetchImpl) {
-  if (customFetchImpl) return customFetchImpl;
-  if (typeof window !== "undefined" && isFunction2(window.fetch)) return window.fetch;
-  if (typeof globalThis !== "undefined" && isFunction2(globalThis.fetch)) return globalThis.fetch;
-  throw new Error("No fetch implementation found");
-}
-var import_objectSpread24 = __toESM2(require_objectSpread2(), 1);
-function resolveHTTPLinkOptions(opts) {
-  return {
-    url: opts.url.toString(),
-    fetch: opts.fetch,
-    transformer: getTransformer(opts.transformer),
-    methodOverride: opts.methodOverride
-  };
-}
-function arrayToDict(array2) {
-  const dict = {};
-  for (let index = 0; index < array2.length; index++) {
-    const element = array2[index];
-    dict[index] = element;
-  }
-  return dict;
-}
-var METHOD = {
-  query: "GET",
-  mutation: "POST",
-  subscription: "PATCH"
-};
-function getInput(opts) {
-  return "input" in opts ? opts.transformer.input.serialize(opts.input) : arrayToDict(opts.inputs.map((_input) => opts.transformer.input.serialize(_input)));
-}
-var getUrl = (opts) => {
-  const parts = opts.url.split("?");
-  const base = parts[0].replace(/\/$/, "");
-  let url = base + "/" + opts.path;
-  const queryParts = [];
-  if (parts[1]) queryParts.push(parts[1]);
-  if ("inputs" in opts) queryParts.push("batch=1");
-  if (opts.type === "query" || opts.type === "subscription") {
-    const input = getInput(opts);
-    if (input !== void 0 && opts.methodOverride !== "POST") queryParts.push(`input=${encodeURIComponent(JSON.stringify(input))}`);
-  }
-  if (queryParts.length) url += "?" + queryParts.join("&");
-  return url;
-};
-var getBody = (opts) => {
-  if (opts.type === "query" && opts.methodOverride !== "POST") return void 0;
-  const input = getInput(opts);
-  return input !== void 0 ? JSON.stringify(input) : void 0;
-};
-var jsonHttpRequester = (opts) => {
-  return httpRequest((0, import_objectSpread24.default)((0, import_objectSpread24.default)({}, opts), {}, {
-    contentTypeHeader: "application/json",
-    getUrl,
-    getBody
-  }));
-};
-var AbortError = class extends Error {
-  constructor() {
-    const name = "AbortError";
-    super(name);
-    this.name = name;
-    this.message = name;
-  }
-};
-var throwIfAborted = (signal) => {
-  var _signal$throwIfAborte;
-  if (!(signal === null || signal === void 0 ? void 0 : signal.aborted)) return;
-  (_signal$throwIfAborte = signal.throwIfAborted) === null || _signal$throwIfAborte === void 0 || _signal$throwIfAborte.call(signal);
-  if (typeof DOMException !== "undefined") throw new DOMException("AbortError", "AbortError");
-  throw new AbortError();
-};
-async function fetchHTTPResponse(opts) {
-  var _opts$methodOverride;
-  throwIfAborted(opts.signal);
-  const url = opts.getUrl(opts);
-  const body = opts.getBody(opts);
-  const method = (_opts$methodOverride = opts.methodOverride) !== null && _opts$methodOverride !== void 0 ? _opts$methodOverride : METHOD[opts.type];
-  const resolvedHeaders = await (async () => {
-    const heads = await opts.headers();
-    if (Symbol.iterator in heads) return Object.fromEntries(heads);
-    return heads;
-  })();
-  const headers = (0, import_objectSpread24.default)((0, import_objectSpread24.default)((0, import_objectSpread24.default)({}, opts.contentTypeHeader && method !== "GET" ? { "content-type": opts.contentTypeHeader } : {}), opts.trpcAcceptHeader ? { "trpc-accept": opts.trpcAcceptHeader } : void 0), resolvedHeaders);
-  return getFetch(opts.fetch)(url, {
-    method,
-    signal: opts.signal,
-    body,
-    headers
-  });
-}
-async function httpRequest(opts) {
-  const meta = {};
-  const res = await fetchHTTPResponse(opts);
-  meta.response = res;
-  const json = await res.json();
-  meta.responseJSON = json;
-  return {
-    json,
-    meta
-  };
-}
-
-// node_modules/@trpc/client/dist/httpLink-DCFpUmZF.mjs
-function isOctetType(input) {
-  return input instanceof Uint8Array || input instanceof Blob;
-}
-function isFormData(input) {
-  return input instanceof FormData;
-}
-var import_objectSpread25 = __toESM2(require_objectSpread2(), 1);
-var universalRequester = (opts) => {
-  if ("input" in opts) {
-    const { input } = opts;
-    if (isFormData(input)) {
-      if (opts.type !== "mutation" && opts.methodOverride !== "POST") throw new Error("FormData is only supported for mutations");
-      return httpRequest((0, import_objectSpread25.default)((0, import_objectSpread25.default)({}, opts), {}, {
-        contentTypeHeader: void 0,
-        getUrl,
-        getBody: () => input
-      }));
-    }
-    if (isOctetType(input)) {
-      if (opts.type !== "mutation" && opts.methodOverride !== "POST") throw new Error("Octet type input is only supported for mutations");
-      return httpRequest((0, import_objectSpread25.default)((0, import_objectSpread25.default)({}, opts), {}, {
-        contentTypeHeader: "application/octet-stream",
-        getUrl,
-        getBody: () => input
-      }));
-    }
-  }
-  return jsonHttpRequester(opts);
-};
-function httpLink(opts) {
-  const resolvedOpts = resolveHTTPLinkOptions(opts);
-  return () => {
-    return (operationOpts) => {
-      const { op } = operationOpts;
-      return observable((observer) => {
-        const { path: path3, input, type } = op;
-        if (type === "subscription") throw new Error("Subscriptions are unsupported by `httpLink` - use `httpSubscriptionLink` or `wsLink`");
-        const request = universalRequester((0, import_objectSpread25.default)((0, import_objectSpread25.default)({}, resolvedOpts), {}, {
-          type,
-          path: path3,
-          input,
-          signal: op.signal,
-          headers() {
-            if (!opts.headers) return {};
-            if (typeof opts.headers === "function") return opts.headers({ op });
-            return opts.headers;
-          }
-        }));
-        let meta = void 0;
-        request.then((res) => {
-          meta = res.meta;
-          const transformed = transformResult(res.json, resolvedOpts.transformer.output);
-          if (!transformed.ok) {
-            observer.error(TRPCClientError.from(transformed.error, { meta }));
-            return;
-          }
-          observer.next({
-            context: res.meta,
-            result: transformed.result
-          });
-          observer.complete();
-        }).catch((cause) => {
-          observer.error(TRPCClientError.from(cause, { meta }));
-        });
-        return () => {
-        };
-      });
-    };
-  };
-}
-
-// node_modules/@trpc/client/dist/httpBatchLink-BOe5aCcR.mjs
-var import_objectSpread26 = __toESM2(require_objectSpread2(), 1);
-
-// node_modules/@trpc/client/dist/loggerLink-ineCN1PO.mjs
-var import_objectSpread27 = __toESM2(require_objectSpread2(), 1);
-
-// node_modules/@trpc/client/dist/wsLink-DVm7B-YP.mjs
-var resultOf = (value, ...args) => {
-  return typeof value === "function" ? value(...args) : value;
-};
-var import_defineProperty$3 = __toESM2(require_defineProperty(), 1);
-function withResolvers() {
-  let resolve;
-  let reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return {
-    promise,
-    resolve,
-    reject
-  };
-}
-async function prepareUrl(urlOptions) {
-  const url = await resultOf(urlOptions.url);
-  if (!urlOptions.connectionParams) return url;
-  const prefix = url.includes("?") ? "&" : "?";
-  const connectionParams = `${prefix}connectionParams=1`;
-  return url + connectionParams;
-}
-async function buildConnectionMessage(connectionParams) {
-  const message = {
-    method: "connectionParams",
-    data: await resultOf(connectionParams)
-  };
-  return JSON.stringify(message);
-}
-var import_defineProperty$2 = __toESM2(require_defineProperty(), 1);
-var import_defineProperty$1 = __toESM2(require_defineProperty(), 1);
-function asyncWsOpen(ws) {
-  const { promise, resolve, reject } = withResolvers();
-  ws.addEventListener("open", () => {
-    ws.removeEventListener("error", reject);
-    resolve();
-  });
-  ws.addEventListener("error", reject);
-  return promise;
-}
-function setupPingInterval(ws, { intervalMs, pongTimeoutMs }) {
-  let pingTimeout;
-  let pongTimeout;
-  function start2() {
-    pingTimeout = setTimeout(() => {
-      ws.send("PING");
-      pongTimeout = setTimeout(() => {
-        ws.close();
-      }, pongTimeoutMs);
-    }, intervalMs);
-  }
-  function reset() {
-    clearTimeout(pingTimeout);
-    start2();
-  }
-  function pong() {
-    clearTimeout(pongTimeout);
-    reset();
-  }
-  ws.addEventListener("open", start2);
-  ws.addEventListener("message", ({ data }) => {
-    clearTimeout(pingTimeout);
-    start2();
-    if (data === "PONG") pong();
-  });
-  ws.addEventListener("close", () => {
-    clearTimeout(pingTimeout);
-    clearTimeout(pongTimeout);
-  });
-}
-var WsConnection = class WsConnection2 {
-  constructor(opts) {
-    var _opts$WebSocketPonyfi;
-    (0, import_defineProperty$1.default)(this, "id", ++WsConnection2.connectCount);
-    (0, import_defineProperty$1.default)(this, "WebSocketPonyfill", void 0);
-    (0, import_defineProperty$1.default)(this, "urlOptions", void 0);
-    (0, import_defineProperty$1.default)(this, "keepAliveOpts", void 0);
-    (0, import_defineProperty$1.default)(this, "wsObservable", behaviorSubject(null));
-    (0, import_defineProperty$1.default)(this, "openPromise", null);
-    this.WebSocketPonyfill = (_opts$WebSocketPonyfi = opts.WebSocketPonyfill) !== null && _opts$WebSocketPonyfi !== void 0 ? _opts$WebSocketPonyfi : WebSocket;
-    if (!this.WebSocketPonyfill) throw new Error("No WebSocket implementation found - you probably don't want to use this on the server, but if you do you need to pass a `WebSocket`-ponyfill");
-    this.urlOptions = opts.urlOptions;
-    this.keepAliveOpts = opts.keepAlive;
-  }
-  get ws() {
-    return this.wsObservable.get();
-  }
-  set ws(ws) {
-    this.wsObservable.next(ws);
-  }
-  /**
-  * Checks if the WebSocket connection is open and ready to communicate.
-  */
-  isOpen() {
-    return !!this.ws && this.ws.readyState === this.WebSocketPonyfill.OPEN && !this.openPromise;
-  }
-  /**
-  * Checks if the WebSocket connection is closed or in the process of closing.
-  */
-  isClosed() {
-    return !!this.ws && (this.ws.readyState === this.WebSocketPonyfill.CLOSING || this.ws.readyState === this.WebSocketPonyfill.CLOSED);
-  }
-  async open() {
-    var _this = this;
-    if (_this.openPromise) return _this.openPromise;
-    _this.id = ++WsConnection2.connectCount;
-    const wsPromise = prepareUrl(_this.urlOptions).then((url) => new _this.WebSocketPonyfill(url));
-    _this.openPromise = wsPromise.then(async (ws) => {
-      _this.ws = ws;
-      ws.binaryType = "arraybuffer";
-      ws.addEventListener("message", function({ data }) {
-        if (data === "PING") this.send("PONG");
-      });
-      if (_this.keepAliveOpts.enabled) setupPingInterval(ws, _this.keepAliveOpts);
-      ws.addEventListener("close", () => {
-        if (_this.ws === ws) _this.ws = null;
-      });
-      await asyncWsOpen(ws);
-      if (_this.urlOptions.connectionParams) ws.send(await buildConnectionMessage(_this.urlOptions.connectionParams));
-    });
-    try {
-      await _this.openPromise;
-    } finally {
-      _this.openPromise = null;
-    }
-  }
-  /**
-  * Closes the WebSocket connection gracefully.
-  * Waits for any ongoing open operation to complete before closing.
-  */
-  async close() {
-    var _this2 = this;
-    try {
-      await _this2.openPromise;
-    } finally {
-      var _this$ws;
-      (_this$ws = _this2.ws) === null || _this$ws === void 0 || _this$ws.close();
-    }
-  }
-};
-(0, import_defineProperty$1.default)(WsConnection, "connectCount", 0);
-var import_defineProperty3 = __toESM2(require_defineProperty(), 1);
-var import_objectSpread28 = __toESM2(require_objectSpread2(), 1);
-
-// node_modules/@trpc/client/dist/index.mjs
-var import_defineProperty4 = __toESM2(require_defineProperty(), 1);
-var import_objectSpread2$4 = __toESM2(require_objectSpread2(), 1);
-var TRPCUntypedClient = class {
-  constructor(opts) {
-    (0, import_defineProperty4.default)(this, "links", void 0);
-    (0, import_defineProperty4.default)(this, "runtime", void 0);
-    (0, import_defineProperty4.default)(this, "requestId", void 0);
-    this.requestId = 0;
-    this.runtime = {};
-    this.links = opts.links.map((link) => link(this.runtime));
-  }
-  $request(opts) {
-    var _opts$context;
-    const chain$ = createChain({
-      links: this.links,
-      op: (0, import_objectSpread2$4.default)((0, import_objectSpread2$4.default)({}, opts), {}, {
-        context: (_opts$context = opts.context) !== null && _opts$context !== void 0 ? _opts$context : {},
-        id: ++this.requestId
-      })
-    });
-    return chain$.pipe(share());
-  }
-  async requestAsPromise(opts) {
-    var _this = this;
-    try {
-      const req$ = _this.$request(opts);
-      const envelope = await observableToPromise(req$);
-      const data = envelope.result.data;
-      return data;
-    } catch (err) {
-      throw TRPCClientError.from(err);
-    }
-  }
-  query(path3, input, opts) {
-    return this.requestAsPromise({
-      type: "query",
-      path: path3,
-      input,
-      context: opts === null || opts === void 0 ? void 0 : opts.context,
-      signal: opts === null || opts === void 0 ? void 0 : opts.signal
-    });
-  }
-  mutation(path3, input, opts) {
-    return this.requestAsPromise({
-      type: "mutation",
-      path: path3,
-      input,
-      context: opts === null || opts === void 0 ? void 0 : opts.context,
-      signal: opts === null || opts === void 0 ? void 0 : opts.signal
-    });
-  }
-  subscription(path3, input, opts) {
-    const observable$ = this.$request({
-      type: "subscription",
-      path: path3,
-      input,
-      context: opts.context,
-      signal: opts.signal
-    });
-    return observable$.subscribe({
-      next(envelope) {
-        switch (envelope.result.type) {
-          case "state": {
-            var _opts$onConnectionSta;
-            (_opts$onConnectionSta = opts.onConnectionStateChange) === null || _opts$onConnectionSta === void 0 || _opts$onConnectionSta.call(opts, envelope.result);
-            break;
-          }
-          case "started": {
-            var _opts$onStarted;
-            (_opts$onStarted = opts.onStarted) === null || _opts$onStarted === void 0 || _opts$onStarted.call(opts, { context: envelope.context });
-            break;
-          }
-          case "stopped": {
-            var _opts$onStopped;
-            (_opts$onStopped = opts.onStopped) === null || _opts$onStopped === void 0 || _opts$onStopped.call(opts);
-            break;
-          }
-          case "data":
-          case void 0: {
-            var _opts$onData;
-            (_opts$onData = opts.onData) === null || _opts$onData === void 0 || _opts$onData.call(opts, envelope.result.data);
-            break;
-          }
-        }
-      },
-      error(err) {
-        var _opts$onError;
-        (_opts$onError = opts.onError) === null || _opts$onError === void 0 || _opts$onError.call(opts, err);
-      },
-      complete() {
-        var _opts$onComplete;
-        (_opts$onComplete = opts.onComplete) === null || _opts$onComplete === void 0 || _opts$onComplete.call(opts);
-      }
-    });
-  }
-};
-var untypedClientSymbol = /* @__PURE__ */ Symbol.for("trpc_untypedClient");
-var clientCallTypeMap = {
-  query: "query",
-  mutate: "mutation",
-  subscribe: "subscription"
-};
-var clientCallTypeToProcedureType = (clientCallType) => {
-  return clientCallTypeMap[clientCallType];
-};
-function createTRPCClientProxy(client) {
-  const proxy = createRecursiveProxy(({ path: path3, args }) => {
-    const pathCopy = [...path3];
-    const procedureType = clientCallTypeToProcedureType(pathCopy.pop());
-    const fullPath = pathCopy.join(".");
-    return client[procedureType](fullPath, ...args);
-  });
-  return createFlatProxy((key) => {
-    if (key === untypedClientSymbol) return client;
-    return proxy[key];
-  });
-}
-function createTRPCClient(opts) {
-  const client = new TRPCUntypedClient(opts);
-  const proxy = createTRPCClientProxy(client);
-  return proxy;
-}
-var import_objectSpread2$3 = __toESM2(require_objectSpread2(), 1);
-var import_objectSpread2$2 = __toESM2(require_objectSpread2(), 1);
-var require_asyncIterator = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/asyncIterator.js"(exports, module) {
-  function _asyncIterator$1(r) {
-    var n, t, o, e = 2;
-    for ("undefined" != typeof Symbol && (t = Symbol.asyncIterator, o = Symbol.iterator); e--; ) {
-      if (t && null != (n = r[t])) return n.call(r);
-      if (o && null != (n = r[o])) return new AsyncFromSyncIterator(n.call(r));
-      t = "@@asyncIterator", o = "@@iterator";
-    }
-    throw new TypeError("Object is not async iterable");
-  }
-  function AsyncFromSyncIterator(r) {
-    function AsyncFromSyncIteratorContinuation(r$1) {
-      if (Object(r$1) !== r$1) return Promise.reject(new TypeError(r$1 + " is not an object."));
-      var n = r$1.done;
-      return Promise.resolve(r$1.value).then(function(r$2) {
-        return {
-          value: r$2,
-          done: n
-        };
-      });
-    }
-    return AsyncFromSyncIterator = function AsyncFromSyncIterator$1(r$1) {
-      this.s = r$1, this.n = r$1.next;
-    }, AsyncFromSyncIterator.prototype = {
-      s: null,
-      n: null,
-      next: function next() {
-        return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments));
-      },
-      "return": function _return(r$1) {
-        var n = this.s["return"];
-        return void 0 === n ? Promise.resolve({
-          value: r$1,
-          done: true
-        }) : AsyncFromSyncIteratorContinuation(n.apply(this.s, arguments));
-      },
-      "throw": function _throw(r$1) {
-        var n = this.s["return"];
-        return void 0 === n ? Promise.reject(r$1) : AsyncFromSyncIteratorContinuation(n.apply(this.s, arguments));
-      }
-    }, new AsyncFromSyncIterator(r);
-  }
-  module.exports = _asyncIterator$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var import_asyncIterator = __toESM2(require_asyncIterator(), 1);
-var import_objectSpread2$12 = __toESM2(require_objectSpread2(), 1);
-var require_usingCtx = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/usingCtx.js"(exports, module) {
-  function _usingCtx() {
-    var r = "function" == typeof SuppressedError ? SuppressedError : function(r$1, e$1) {
-      var n$1 = Error();
-      return n$1.name = "SuppressedError", n$1.error = r$1, n$1.suppressed = e$1, n$1;
-    }, e = {}, n = [];
-    function using(r$1, e$1) {
-      if (null != e$1) {
-        if (Object(e$1) !== e$1) throw new TypeError("using declarations can only be used with objects, functions, null, or undefined.");
-        if (r$1) var o = e$1[Symbol.asyncDispose || Symbol["for"]("Symbol.asyncDispose")];
-        if (void 0 === o && (o = e$1[Symbol.dispose || Symbol["for"]("Symbol.dispose")], r$1)) var t = o;
-        if ("function" != typeof o) throw new TypeError("Object is not disposable.");
-        t && (o = function o$1() {
-          try {
-            t.call(e$1);
-          } catch (r$2) {
-            return Promise.reject(r$2);
-          }
-        }), n.push({
-          v: e$1,
-          d: o,
-          a: r$1
-        });
-      } else r$1 && n.push({
-        d: e$1,
-        a: r$1
-      });
-      return e$1;
-    }
-    return {
-      e,
-      u: using.bind(null, false),
-      a: using.bind(null, true),
-      d: function d() {
-        var o, t = this.e, s = 0;
-        function next() {
-          for (; o = n.pop(); ) try {
-            if (!o.a && 1 === s) return s = 0, n.push(o), Promise.resolve().then(next);
-            if (o.d) {
-              var r$1 = o.d.call(o.v);
-              if (o.a) return s |= 2, Promise.resolve(r$1).then(next, err);
-            } else s |= 1;
-          } catch (r$2) {
-            return err(r$2);
-          }
-          if (1 === s) return t !== e ? Promise.reject(t) : Promise.resolve();
-          if (t !== e) throw t;
-        }
-        function err(n$1) {
-          return t = t !== e ? new r(n$1, t) : n$1, next();
-        }
-        return next();
-      }
-    };
-  }
-  module.exports = _usingCtx, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_OverloadYield = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/OverloadYield.js"(exports, module) {
-  function _OverloadYield(e, d) {
-    this.v = e, this.k = d;
-  }
-  module.exports = _OverloadYield, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_awaitAsyncGenerator = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/awaitAsyncGenerator.js"(exports, module) {
-  var OverloadYield$1 = require_OverloadYield();
-  function _awaitAsyncGenerator$1(e) {
-    return new OverloadYield$1(e, 0);
-  }
-  module.exports = _awaitAsyncGenerator$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var require_wrapAsyncGenerator = __commonJS2({ "../../node_modules/.pnpm/@oxc-project+runtime@0.72.2/node_modules/@oxc-project/runtime/src/helpers/wrapAsyncGenerator.js"(exports, module) {
-  var OverloadYield = require_OverloadYield();
-  function _wrapAsyncGenerator$1(e) {
-    return function() {
-      return new AsyncGenerator(e.apply(this, arguments));
-    };
-  }
-  function AsyncGenerator(e) {
-    var r, t;
-    function resume(r$1, t$1) {
-      try {
-        var n = e[r$1](t$1), o = n.value, u = o instanceof OverloadYield;
-        Promise.resolve(u ? o.v : o).then(function(t$2) {
-          if (u) {
-            var i = "return" === r$1 ? "return" : "next";
-            if (!o.k || t$2.done) return resume(i, t$2);
-            t$2 = e[i](t$2).value;
-          }
-          settle(n.done ? "return" : "normal", t$2);
-        }, function(e$1) {
-          resume("throw", e$1);
-        });
-      } catch (e$1) {
-        settle("throw", e$1);
-      }
-    }
-    function settle(e$1, n) {
-      switch (e$1) {
-        case "return":
-          r.resolve({
-            value: n,
-            done: true
-          });
-          break;
-        case "throw":
-          r.reject(n);
-          break;
-        default:
-          r.resolve({
-            value: n,
-            done: false
-          });
-      }
-      (r = r.next) ? resume(r.key, r.arg) : t = null;
-    }
-    this._invoke = function(e$1, n) {
-      return new Promise(function(o, u) {
-        var i = {
-          key: e$1,
-          arg: n,
-          resolve: o,
-          reject: u,
-          next: null
-        };
-        t ? t = t.next = i : (r = t = i, resume(e$1, n));
-      });
-    }, "function" != typeof e["return"] && (this["return"] = void 0);
-  }
-  AsyncGenerator.prototype["function" == typeof Symbol && Symbol.asyncIterator || "@@asyncIterator"] = function() {
-    return this;
-  }, AsyncGenerator.prototype.next = function(e) {
-    return this._invoke("next", e);
-  }, AsyncGenerator.prototype["throw"] = function(e) {
-    return this._invoke("throw", e);
-  }, AsyncGenerator.prototype["return"] = function(e) {
-    return this._invoke("return", e);
-  };
-  module.exports = _wrapAsyncGenerator$1, module.exports.__esModule = true, module.exports["default"] = module.exports;
-} });
-var import_usingCtx = __toESM2(require_usingCtx(), 1);
-var import_awaitAsyncGenerator = __toESM2(require_awaitAsyncGenerator(), 1);
-var import_wrapAsyncGenerator = __toESM2(require_wrapAsyncGenerator(), 1);
-var import_objectSpread29 = __toESM2(require_objectSpread2(), 1);
-
-// src/trpc.ts
-var createApiClient = () => {
-  return createTRPCClient({
-    links: [
-      httpLink({
-        url: `${getApiBaseUrl()}/api/trpc`
-      })
-    ]
-  });
-};
-
 // src/utils.ts
 import { exec } from "child_process";
-var sleep2 = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+var sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 var poll = async (options) => {
   const { fn, isSuccess, isFailure, getFailureError, intervalMs, timeoutMs, timeoutError } = options;
   const deadline = Date.now() + timeoutMs;
@@ -22101,7 +20936,7 @@ var poll = async (options) => {
         throw error2;
       }
     }
-    await sleep2(intervalMs);
+    await sleep(intervalMs);
   }
   throw new Error(timeoutError);
 };
@@ -22122,15 +20957,9 @@ var safeOpenUrl = (url) => {
 };
 
 // src/auth.ts
-var fetchAuthPollData = async (code, apiUrl) => {
-  const url = `${apiUrl}/api/trpc/auth.poll?input=${encodeURIComponent(JSON.stringify({ code }))}`;
-  const res = await fetch(url);
-  const json = await res.json();
-  return json.result?.data ?? null;
-};
-var pollForAuthCompletion = async (code, apiUrl, timeoutMs = AUTH_POLL_TIMEOUT_MS) => {
+var pollForAuthCompletion = async (code, timeoutMs = AUTH_POLL_TIMEOUT_MS) => {
   const result = await poll({
-    fn: () => fetchAuthPollData(code, apiUrl),
+    fn: () => api.auth.poll(code),
     isSuccess: (data) => data.status === PollStatus.SUCCESS && data.token !== void 0 && data.refresh_token !== void 0 && data.user !== void 0,
     isFailure: (data) => data.status === PollStatus.EXPIRED,
     getFailureError: () => "Authentication code expired",
@@ -22145,9 +20974,8 @@ var pollForAuthCompletion = async (code, apiUrl, timeoutMs = AUTH_POLL_TIMEOUT_M
   return { token, refresh_token, user };
 };
 var start = async () => {
-  const api = createApiClient();
   try {
-    const data = await api.auth.start.mutate();
+    const data = await api.auth.start();
     return { code: data.code, url: data.url };
   } catch (error2) {
     throw new Error(
@@ -22155,11 +20983,10 @@ var start = async () => {
     );
   }
 };
-var run2 = async () => {
-  const apiUrl = getApiBaseUrl();
+var run = async () => {
   const { code, url } = await start();
   safeOpenUrl(url);
-  const { token, refresh_token, user } = await pollForAuthCompletion(code, apiUrl);
+  const { token, refresh_token, user } = await pollForAuthCompletion(code);
   const config2 = {
     auth: {
       token,
@@ -22174,11 +21001,8 @@ var run2 = async () => {
 var refresh = async () => {
   const config2 = await readConfig();
   if (!config2.auth?.refresh_token) return false;
-  const api = createApiClient();
   try {
-    const result = await api.auth.refresh.mutate({
-      refresh_token: config2.auth.refresh_token
-    });
+    const result = await api.auth.refresh(config2.auth.refresh_token);
     if (!result.success) {
       return false;
     }
@@ -22211,9 +21035,8 @@ var getLocalToken = async () => {
   return config2.auth.token;
 };
 var validate = async (token) => {
-  const api = createApiClient();
   try {
-    const result = await api.auth.validate.query({ token });
+    const result = await api.auth.validate(token);
     return result.valid;
   } catch {
     return false;
@@ -22227,9 +21050,9 @@ var getToken = async () => {
       return localToken;
     }
   }
-  return run2();
+  return run();
 };
-var auth = { run: run2, validate, getToken, refresh };
+var auth = { run, validate, getToken, refresh };
 
 // src/session.ts
 import fs2 from "fs/promises";
@@ -22280,17 +21103,9 @@ var extract = async (projectPath) => {
 var session = { extract };
 
 // src/tools/share.ts
-var fetchSessionPollData = async (sessionId, apiUrl) => {
-  const url = `${apiUrl}/api/trpc/sessions.poll?input=${encodeURIComponent(
-    JSON.stringify({ id: sessionId })
-  )}`;
-  const res = await fetch(url);
-  const json = await res.json();
-  return json.result?.data ?? null;
-};
-var pollForProcessing = async (sessionId, apiUrl, timeoutMs = SESSION_POLL_TIMEOUT_MS) => {
+var pollForProcessing = async (sessionId, timeoutMs = SESSION_POLL_TIMEOUT_MS) => {
   const result = await poll({
-    fn: () => fetchSessionPollData(sessionId, apiUrl),
+    fn: () => api.sessions.poll(sessionId),
     isSuccess: (data) => data.status === SessionStatus.READY && data.url !== void 0,
     isFailure: (data) => data.status === SessionStatus.FAILED,
     getFailureError: (data) => data.error || "Processing failed",
@@ -22326,15 +21141,13 @@ var registerShare = (server) => {
             `Session too large: ${(sizeBytes / 1024 / 1024).toFixed(1)}MB exceeds 50MB limit`
           );
         }
-        const api = createApiClient();
-        const apiUrl = getApiBaseUrl();
-        const result = await api.sessions.publish.mutate({
+        const result = await api.sessions.publish({
           title,
           conversation_data: content,
           is_public,
           access_token: token
         });
-        const url = await pollForProcessing(result.id, apiUrl);
+        const url = await pollForProcessing(result.id);
         safeOpenUrl(url);
         return {
           content: [{ type: "text", text: url }]
@@ -22370,8 +21183,3 @@ var main = async () => {
   await server.connect(transport);
 };
 main().catch(console.error);
-/*! Bundled license information:
-
-@trpc/client/dist/httpLink-DCFpUmZF.mjs:
-  (* istanbul ignore if -- @preserve *)
-*/

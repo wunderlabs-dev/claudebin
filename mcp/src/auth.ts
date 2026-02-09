@@ -1,4 +1,5 @@
-import { getApiBaseUrl, readConfig, writeConfig } from "./config.js";
+import { api, type AuthPollResponse } from "./api.js";
+import { readConfig, writeConfig } from "./config.js";
 import {
   AUTH_POLL_TIMEOUT_MS,
   AUTH_TOKEN_TTL_MS,
@@ -7,31 +8,15 @@ import {
   PollStatus,
   TOKEN_REFRESH_BUFFER_MS,
 } from "./constants.js";
-import { createApiClient } from "./trpc.js";
 import type { Config, UserConfig } from "./types.js";
 import { poll, safeOpenUrl } from "./utils.js";
 
-interface AuthPollData {
-  status: string;
-  token?: string;
-  refresh_token?: string;
-  user?: UserConfig;
-}
-
-const fetchAuthPollData = async (code: string, apiUrl: string): Promise<AuthPollData | null> => {
-  const url = `${apiUrl}/api/trpc/auth.poll?input=${encodeURIComponent(JSON.stringify({ code }))}`;
-  const res = await fetch(url);
-  const json = await res.json();
-  return json.result?.data ?? null;
-};
-
 const pollForAuthCompletion = async (
   code: string,
-  apiUrl: string,
   timeoutMs = AUTH_POLL_TIMEOUT_MS,
 ): Promise<{ token: string; refresh_token: string; user: UserConfig }> => {
-  const result = await poll<AuthPollData>({
-    fn: () => fetchAuthPollData(code, apiUrl),
+  const result = await poll<AuthPollResponse>({
+    fn: () => api.auth.poll(code),
     isSuccess: (data) =>
       data.status === PollStatus.SUCCESS &&
       data.token !== undefined &&
@@ -54,10 +39,8 @@ const pollForAuthCompletion = async (
 };
 
 const start = async (): Promise<{ code: string; url: string }> => {
-  const api = createApiClient();
-
   try {
-    const data = await api.auth.start.mutate();
+    const data = await api.auth.start();
     return { code: data.code, url: data.url };
   } catch (error) {
     throw new Error(
@@ -67,12 +50,10 @@ const start = async (): Promise<{ code: string; url: string }> => {
 };
 
 const run = async (): Promise<string> => {
-  const apiUrl = getApiBaseUrl();
-
   const { code, url } = await start();
   safeOpenUrl(url);
 
-  const { token, refresh_token, user } = await pollForAuthCompletion(code, apiUrl);
+  const { token, refresh_token, user } = await pollForAuthCompletion(code);
 
   const config: Config = {
     auth: {
@@ -92,12 +73,8 @@ const refresh = async (): Promise<boolean> => {
 
   if (!config.auth?.refresh_token) return false;
 
-  const api = createApiClient();
-
   try {
-    const result = await api.auth.refresh.mutate({
-      refresh_token: config.auth.refresh_token,
-    });
+    const result = await api.auth.refresh(config.auth.refresh_token);
 
     if (!result.success) {
       return false;
@@ -106,8 +83,8 @@ const refresh = async (): Promise<boolean> => {
     await writeConfig({
       ...config,
       auth: {
-        token: result.access_token,
-        refresh_token: result.refresh_token,
+        token: result.access_token!,
+        refresh_token: result.refresh_token!,
         expires_at: result.expires_at
           ? result.expires_at * 1_000
           : Date.now() + DEFAULT_TOKEN_TTL_MS,
@@ -140,10 +117,8 @@ const getLocalToken = async (): Promise<string | null> => {
 };
 
 const validate = async (token: string): Promise<boolean> => {
-  const api = createApiClient();
-
   try {
-    const result = await api.auth.validate.query({ token });
+    const result = await api.auth.validate(token);
     return result.valid;
   } catch {
     return false;
