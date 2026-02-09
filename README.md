@@ -18,19 +18,6 @@ Then install the plugin from this marketplace:
 claude plugin install claudebin@claudebin-marketplace
 ```
 
-### Local Development
-
-If you've cloned this repository for development:
-
-```bash
-cd mcp
-bun install
-bun run build
-cd ..
-claude plugin marketplace add .
-claude plugin install claudebin@claudebin-marketplace
-```
-
 ## Usage
 
 ### /share
@@ -61,6 +48,7 @@ Build the MCP server:
 
 ```bash
 cd mcp
+bun install
 bun run build
 ```
 
