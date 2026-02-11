@@ -1,6 +1,20 @@
 {
   "name": "claudebin-mcp",
   "version": "0.1.0",
+  "description": "MCP server for sharing Claude Code sessions to claudebin.com",
+  "author": "Wunderlabs <office@wunderlabs.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wunderlabs-dev/claudebin.git"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "mcp",
+    "plugin",
+    "sharing"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
