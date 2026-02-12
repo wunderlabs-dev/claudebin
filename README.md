@@ -1,6 +1,18 @@
-# Claudebin Plugin
+<p align="center">
+  <img src=".github/logo.svg" alt="Claudebin" width="360" />
+</p>
 
-A Claude Code plugin for publishing sessions to claudebin.com.
+<p align="center">
+  Share your Claude Code sessions with teammates.
+</p>
+
+<p align="center">
+  <a href="https://claudebin.com">Website</a> &middot;
+  <a href="https://github.com/wunderlabs-dev/claudebin.com">Web App</a> &middot;
+  <a href="#installation">Installation</a>
+</p>
+
+---
 
 ## Installation
 
@@ -11,26 +23,24 @@ claude plugin install claudebin@claudebin-marketplace
 
 ## Usage
 
-### /claudebin:share
-
-Publish the current session to claudebin.com and get a shareable URL.
+Run `/claudebin:share` inside any Claude Code session to publish it and get a shareable URL.
 
 ```
 /claudebin:share
 ```
 
-Returns a URL like `https://claudebin.com/threads/abc123` that anyone can view.
+Returns a link like `https://claudebin.com/threads/abc123` — complete with syntax highlighting, tool calls, and the full conversation thread.
 
 Automatically authenticates via browser if not logged in.
 
-## Architecture
+## How it works
 
 ```
-/claudebin:share → Claude calls → MCP share tool → Auth if needed (opens browser)
-                                                 → Upload to Supabase
-                                                 → Background processing
-                                                 → Poll for completion
-                                                 → Return URL
+/claudebin:share → MCP share tool → Auth (opens browser if needed)
+                                   → Upload to Supabase
+                                   → Background processing
+                                   → Poll for completion
+                                   → Return URL
 ```
 
 ## Development
@@ -43,10 +53,12 @@ bun install
 bun run build
 ```
 
-Run Claude with the local plugin and a local API:
+Run Claude with the local plugin pointing at a local API:
 
 ```bash
 CLAUDEBIN_API_URL=http://localhost:3000 claude --plugin-dir /path/to/claudebin --dangerously-skip-permissions
 ```
 
-This allows testing against a local claudebin.com backend running on port 3000.
+## License
+
+MIT
