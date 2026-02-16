@@ -20898,7 +20898,6 @@ var api = {
 // src/constants.ts
 var TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1e3;
 var DEFAULT_TOKEN_TTL_MS = 60 * 60 * 1e3;
-var AUTH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1e3;
 var POLL_INTERVAL_MS = 2e3;
 var AUTH_POLL_TIMEOUT_MS = 5 * 6e4;
 var SESSION_POLL_TIMEOUT_MS = 12e4;
@@ -20991,7 +20990,7 @@ var run = async () => {
     auth: {
       token,
       refresh_token,
-      expires_at: Date.now() + AUTH_TOKEN_TTL_MS
+      expires_at: Date.now() + DEFAULT_TOKEN_TTL_MS
     },
     user
   };
@@ -21048,6 +21047,13 @@ var getToken = async () => {
     const isValid2 = await validate(localToken);
     if (isValid2) {
       return localToken;
+    }
+    const refreshed = await refresh();
+    if (refreshed) {
+      const config2 = await readConfig();
+      if (config2.auth?.token) {
+        return config2.auth.token;
+      }
     }
   }
   return run();

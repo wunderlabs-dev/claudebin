@@ -2,7 +2,6 @@ import { api, type AuthPollResponse } from "./api.js";
 import { readConfig, writeConfig } from "./config.js";
 import {
   AUTH_POLL_TIMEOUT_MS,
-  AUTH_TOKEN_TTL_MS,
   DEFAULT_TOKEN_TTL_MS,
   POLL_INTERVAL_MS,
   PollStatus,
@@ -59,7 +58,7 @@ const run = async (): Promise<string> => {
     auth: {
       token,
       refresh_token,
-      expires_at: Date.now() + AUTH_TOKEN_TTL_MS,
+      expires_at: Date.now() + DEFAULT_TOKEN_TTL_MS,
     },
     user,
   };
@@ -132,6 +131,14 @@ const getToken = async (): Promise<string> => {
     const isValid = await validate(localToken);
     if (isValid) {
       return localToken;
+    }
+
+    const refreshed = await refresh();
+    if (refreshed) {
+      const config = await readConfig();
+      if (config.auth?.token) {
+        return config.auth.token;
+      }
     }
   }
 
