@@ -56,8 +56,10 @@ export const registerShare = (server: McpServer): void => {
 
         const sizeBytes = new TextEncoder().encode(content).length;
         if (sizeBytes > MAX_SESSION_SIZE_BYTES) {
+          const limitMB = MAX_SESSION_SIZE_BYTES/(1024*1024);
+          
           throw new Error(
-            `Session too large: ${(sizeBytes / 1024 / 1024).toFixed(1)}MB exceeds 50MB limit`,
+            `Session too large: ${(sizeBytes / 1024 / 1024).toFixed(1)}MB exceeds ${limitMB}MB limit`,
           );
         }
 
