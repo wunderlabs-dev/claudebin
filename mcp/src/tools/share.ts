@@ -32,6 +32,20 @@ const pollForProcessing = async (
   return result.url;
 };
 
+async function retry<T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): Promise<T> {
+  let attempt = 0;
+  while (attempt < retries) {
+    try {
+      return await fn();
+    } catch (error) {
+      attempt++;
+      if (attempt >= retries) throw error;
+      await new Promise(res => setTimeout(res, delayMs));
+    }
+  }
+  throw new Error("Retry failed unexpectedly");
+}
+
 export const registerShare = (server: McpServer): void => {
   server.registerTool(
     "share",
@@ -56,17 +70,21 @@ export const registerShare = (server: McpServer): void => {
 
         const sizeBytes = new TextEncoder().encode(content).length;
         if (sizeBytes > MAX_SESSION_SIZE_BYTES) {
+          const limitMB = MAX_SESSION_SIZE_BYTES/(1024*1024);
+          
           throw new Error(
-            `Session too large: ${(sizeBytes / 1024 / 1024).toFixed(1)}MB exceeds 50MB limit`,
+            `Session too large: ${(sizeBytes / 1024 / 1024).toFixed(1)}MB exceeds ${limitMB}MB limit`,
           );
         }
 
-        const result = await api.sessions.publish({
-          title,
-          conversation_data: content,
-          is_public,
-          access_token: token,
-        });
+        const result = await retry(() =>
+          api.sessions.publish({
+            title,
+            conversation_data: content,
+            is_public,
+            access_token: token,
+          })
+        );
 
         const url = await pollForProcessing(result.id);
         safeOpenUrl(url);
